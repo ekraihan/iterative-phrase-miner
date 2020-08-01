@@ -1,0 +1,1 @@
+(cd AutoPhrase && ./auto_phrase.sh)
