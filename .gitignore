@@ -4,3 +4,4 @@ conda_env
 tmp
 __pycache__
 models
+client-data

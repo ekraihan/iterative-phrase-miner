@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Iterative AutoPhrase</title>
+        <meta name="description" content="Iterative AutoPhrase">
+        <meta name="author" content="Elias Kraihanzel">
+
+        <!-- Milligram CSS -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.0/milligram.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
+
+        <!-- Main CSS -->
+        <link rel="stylesheet" href="index.css">
+    </head>
+
+    <body>
+        <!-- <button onclick="invokeAlgorithm()">Mine Top Phrases</button> -->
+        <!-- <button onclick="killAlgorithm()">Kill Algorithm</button> -->
+
+        <div id=root>
+            <h2>Iterative AutoPhrase</h2>
+
+    <iframe name="hiddenFrame" class="hide"></iframe>
+
+            <div>Upload a file to mine. The default is a collection of Chinese restauraunt reveiws.</div>
+            <form action = "http://ec2-34-239-169-229.compute-1.amazonaws.com:5000/uploader" method = "POST" 
+                enctype = "multipart/form-data" target="hiddenFrame">
+                <input type = "file" name = "file" />
+                <input type = "submit"/>
+            </form>   
+
+
+            <div>Enter the number of top phrases you want to mine:</div>
+            <input type="number" v-model="topPhraseCount" placeholder="topPhraseCount" style="width: 10em">
+
+            <div class="buttons-and-such">
+                <button
+                    @click="invokeAlgorithm"
+                    :disabled="algorithmState=='RUNNING' || topPhraseCount==='' || topPhraseCount==='0' || unlabelledPhrases.length > 0"
+                    style="margin-right: 5px"
+                >Mine Top {{ parseInt(topPhraseCount) }} Phrases</button>
+                <button @click="killAlgorithm" v-if="algorithmState=='RUNNING'">Kill Mining</button>
+                <div v-if="algorithmState=='RUNNING'" class="lds-dual-ring"></div>   
+            </div>
+
+            <div>{{ progressMessage }}</div><br>
+
+            <div id="phrase-newspaper">
+                <div v-if="unlabelledPhrases.length != 0 && algorithmState=='IDLE'" class="phrase-checkboxes">
+                    <div>Select and Save the Phrases You're Interested In</div>
+                    <button @click="saveLabelledPhrases" >Save Phrases</button>
+                    <label v-for="phrase in unlabelledPhrases" :key="phrase" class="phrase-checkbox">
+                        <input type="checkbox" :id="phrase" :value="phrase" v-model="positivePhrases">
+                        <div>{{ phrase }}</div>
+                    </label>
+                </div>
+                <div v-else class="phrase-checkboxes"></div>
+
+                <div class="saved-phrases">
+                    <div>Saved Phrases</div>
+                    <button @click="clearPositivePhrases">Clear Positive Phrases</button>
+                    <div v-for="phrase in savedPositivePhrases" :key="phrase" class="phrase-checkbox">
+                        <div>{{ phrase }}</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- SocketIO -->
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+
+        <!-- <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script> -->
+
+        <!-- Vue -->
+        <script src="https://unpkg.com/vue@2.6.9/dist/vue.js"></script>
+
+        <!-- Utils javascript file -->
+        <script type="text/javascript" src="utils.js"></script>
+
+        <!-- Main javascript file -->
+        <script type="text/javascript" src="index.js"></script>
+
+    </body>
+
+</html>
