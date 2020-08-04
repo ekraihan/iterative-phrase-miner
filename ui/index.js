@@ -66,8 +66,9 @@ new Vue({
             if (this.algorithmState === 'IDLE') {
                 console.log("invoking algorithm")
 
-                // this.socket.emit('dummyInvokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: ["x", "y", "z"], topPhraseCount: 20 });
-                this.socket.emit('invokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: ["x", "y", "z"], topPhraseCount: parseInt(this.topPhraseCount) });
+                // this.socket.emit('dummyInvokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: this.phraseDatabase.getNegativePhrases(), topPhraseCount: 20 });
+                console.log("sending", this.phraseDatabase.getNegativePhrases())
+                this.socket.emit('invokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: this.phraseDatabase.getNegativePhrases(), topPhraseCount: parseInt(this.topPhraseCount) });
                 this.algorithmState = 'RUNNING';
             } else {
                 console.log("Algorithm already running")
@@ -85,17 +86,15 @@ new Vue({
         },
 
         saveLabelledPhrases() {
-
-            if (this.positivePhrases.length != 0) {
-                this.phraseDatabase.addPositivePhrases(this.positivePhrases);
-                this.savedPositivePhrases = this.phraseDatabase.getPositivePhrases()
-            }
+            this.phraseDatabase.addPhrases(this.positivePhrases, this.unlabelledPhrases);
+            this.savedPositivePhrases = this.phraseDatabase.getPositivePhrases()
+            
             this.unlabelledPhrases = []
             this.positivePhrases = []
         },
 
-        clearPositivePhrases() {
-            this.phraseDatabase.clearPositivePhrases();
+        clearPhrases() {
+            this.phraseDatabase.clearPhrases();
             this.savedPositivePhrases = []
         }
     }

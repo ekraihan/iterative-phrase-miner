@@ -12,23 +12,38 @@ localStorage.unlabelledPhrases = localStorage.unlabelledPhrases || JSON.stringif
 class PhraseDatabase {
     constructor() {
         this.positivePhrases = new Set(JSON.parse(localStorage.positivePhrases))
+        this.negativePhrases = new Set(JSON.parse(localStorage.negativePhrases))
     }
 
-    addPositivePhrases(phrases) {
-        for (let phrase of phrases) {
+    addPhrases(positivePhrases, allPhrases) {
+        for (let phrase of positivePhrases) {
             this.positivePhrases.add(phrase)
         }
 
+        for (let phrase of allPhrases) {
+            if (!this.positivePhrases.has(phrase)) {
+                this.negativePhrases.add(phrase)
+            }
+        }
+
         localStorage.positivePhrases = JSON.stringify([...this.positivePhrases])
+        localStorage.negativePhrases = JSON.stringify([...this.negativePhrases])
     }
 
     getPositivePhrases() {
         return [...this.positivePhrases];
     }
 
-    clearPositivePhrases() {
+    getNegativePhrases() {
+        return [...this.negativePhrases];
+    }
+
+    clearPhrases() {
         localStorage.removeItem('positivePhrases');
         this.positivePhrases = new Set([])
+
+        localStorage.removeItem('negativePhrases');
+        this.negativePhrases = new Set([])
     }
 }
 

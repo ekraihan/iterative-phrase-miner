@@ -38,12 +38,14 @@ def start_mining_process(trainingFile, modelPath, positivePhrases):
                            },
                            text=True)
 
-def collect_top_n_phrases(autoPhraseIter, topPhraseCount, positivePhrases):
+def collect_top_n_phrases(autoPhraseIter, topPhraseCount, clientPhrases):
+
+    print("cli dude:", clientPhrases)
     finalPhrases = list()
     for rawPhrase in autoPhraseIter:
         phrase = rawPhrase.split('\t')[1].strip()
         print("next")
-        if phrase not in positivePhrases:
+        if phrase not in clientPhrases:
             print("found new phrase")
             finalPhrases.append(phrase)
             if len(finalPhrases) == topPhraseCount:
@@ -67,13 +69,15 @@ def mine_phrases(args):
         clientData = args[1]
         topPhraseCount = clientData['topPhraseCount']
         positivePhrases = clientData['positiveLabels']
+        negativePhrases = clientData['negativeLabels']
+        clientPhrases = negativePhrases + positivePhrases
         browserId = clientData['browserId']
 
         modelPath = f'models/{str(uuid.uuid4())}'
 
         trainingData = f'client-data/{browserId}.txt'
         if not os.path.exists(trainingData):
-            trainingData = 'data/reviews-chinese'
+            trainingData = 'data/reviews-chinese.txt'
 
         process = start_mining_process(trainingData, modelPath, positivePhrases)
 
@@ -96,7 +100,7 @@ def mine_phrases(args):
                 if (returnCode == 0):
                     if os.path.exists(f'{modelPath}/AutoPhrase.txt'):
                         with open(f'{modelPath}/AutoPhrase.txt') as autoPhraseIter:
-                            topLabels = collect_top_n_phrases(autoPhraseIter, topPhraseCount, positivePhrases)
+                            topLabels = collect_top_n_phrases(autoPhraseIter, topPhraseCount, clientPhrases)
                         socketio.emit('miningFinished', {'topLabels': topLabels }, room=socketIoRoom)
                     else:
                         socketio.emit('miningFailed', room=socketIoRoom)
@@ -152,6 +156,7 @@ def invoke_alogrithm(clientData):
 def dummy_invoke_alogrithm(clientData):
 
     print(clientData['positiveLabels'])
+    print(clientData['negativeLabels'])
     socketio.emit('miningFinished', {'topLabels': ['peas', 'and', 'carrots', "M, y"] }, room=request.sid)
 
 @socketio.on('killAlgorithm')
