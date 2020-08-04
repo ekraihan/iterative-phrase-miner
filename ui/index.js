@@ -64,6 +64,12 @@ new Vue({
         this.socket.on('algorithmAlreadyRunning', (msg) => {
             console.log("algorithmAlreadyRunning")
         });
+
+        this.socket.on('noPhrasesFound', (msg) => {
+            this.algorithmState = 'IDLE';
+            this.progressMessage = "No Frequent Phrases Found"
+        });
+        
     },
 
     methods: {
@@ -113,17 +119,26 @@ new Vue({
             let formData = new FormData();
             formData.append("file", file);
             this.algorithmState = 'UPLOADING'
-            fetch(`${HOST}/upload`, {method: "POST", body: formData})
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Upload Successful")
-                        localStorage.miningFileName = file.name
-                        this.fileName = file.name
-                    } else {
-                        window.alert(`Upload failed with reason ${response.statusText}`)
-                    }
-                    this.algorithmState = 'IDLE'
-                })
+            try {
+                fetch(`${HOST}/upload`, {method: "POST", body: formData})
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Upload Successful")
+                            localStorage.miningFileName = file.name
+                            this.fileName = file.name
+                        } else {
+                            window.alert(`Upload failed with reason ${response.statusText}`)
+                        }
+                        this.algorithmState = 'IDLE'
+                    }).catch((err, d) => {
+                        console.log(d)
+                        this.algorithmState = 'IDLE'
+                        window.alert(`Upload failed. Refresh and try again?`)
+                    })
+            } catch (error) {
+                console.log(error)
+            }
+
         },
 
         useDefaultFile() {

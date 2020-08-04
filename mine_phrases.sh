@@ -135,7 +135,6 @@ else
 fi
 
 # echo SAVING_MODEL
-
 cp tmp/segmentation.model ${MODEL_DIR}/segmentation.model
 cp tmp/token_mapping.txt ${MODEL_DIR}/token_mapping.txt
 cp tmp/language.txt ${MODEL_DIR}/language.txt
@@ -146,7 +145,6 @@ cp tmp/language.txt ${MODEL_DIR}/language.txt
 # java $TOKENIZER -m translate -i tmp/final_quality_multi-words.txt -o ${MODEL_DIR}/AutoPhrase_multi-words.txt -t $TOKEN_MAPPING -c N -thread $THREAD
 # java $TOKENIZER -m translate -i tmp/final_quality_unigrams.txt -o ${MODEL_DIR}/AutoPhrase_single-word.txt -t $TOKEN_MAPPING -c N -thread $THREAD
 java $TOKENIZER -m translate -i tmp/final_quality_salient.txt -o ${MODEL_DIR}/AutoPhrase.txt -t $TOKEN_MAPPING -c N -thread $THREAD
-
 # java $TOKENIZER -m translate -i tmp/distant_training_only_salient.txt -o results/DistantTraning.txt -t $TOKEN_MAPPING -c N -thread $THREAD
 
 ### END Generating Output for Checking Quality ###

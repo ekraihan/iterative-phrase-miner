@@ -103,17 +103,17 @@ def mine_phrases(args):
                             topLabels = collect_top_n_phrases(autoPhraseIter, topPhraseCount, clientPhrases)
                         socketio.emit('miningFinished', {'topLabels': topLabels }, room=socketIoRoom)
                     else:
-                        socketio.emit('miningFailed', room=socketIoRoom)
+                        socketio.emit('noPhrasesFound', room=socketIoRoom)
                 elif (returnCode == -9):
                     socketio.emit('miningKilled', room=socketIoRoom)
                 else:
+                    print(returnCode)
                     socketio.emit('miningFailed', room=socketIoRoom)
 
                 shutil.rmtree(modelPath, ignore_errors=True)
 
                 break
     except Exception as e:
-        print(e)
         socketio.emit('miningFailed', room=socketIoRoom)
     finally:
         shutil.rmtree(f'{modelPath}/quality_phrases.txt', ignore_errors=True)
