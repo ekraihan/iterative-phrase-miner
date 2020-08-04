@@ -1,13 +1,13 @@
 // Vue.component('multiselect', window.VueMultiselect.default)
-const HOST = "http://ec2-34-239-169-229.compute-1.amazonaws.com:5000";
+const HOST = "http://ec2-3-237-1-155.compute-1.amazonaws.com:5000/";
 
 const userMessage = {
     'TOKENIZING_USER_FILE': 'Tokenizing User File ',
     'TOKENIZING_KNOWLEDGE_BASE': 'Tokenizing Knowledge Base',
     'PERFORMING_PART_OF_SPEECH_TAGGING': 'Performing Part-Of-Speech Tagging',
     'EXTRACTING_PHRASES': 'Extracing Phrases',
-    'SAVING_MODEL': 'Saving Model',
-    'SAVING_PRASES': 'Saving Phrases'
+    'SAVING_MODEL': 'Writing Model to Disk',
+    'SAVING_PRASES': 'Writing Phrases to Disk'
 }
 
 new Vue({
@@ -24,13 +24,19 @@ new Vue({
         phraseDatabase: new PhraseDatabase(),
         socket: io.connect(HOST),
         progressMessage: null,
-        topPhraseCount: 10
+        topPhraseCount: 10,
+        fileName: null
     },
 
     mounted() {
         // this.environment.apiUrl = location.host.split(':')[0]
 
         this.savedPositivePhrases = this.phraseDatabase.getPositivePhrases()
+        this.fileName = localStorage.miningFileName
+
+        // this.socket.on('connect', (messageKey) => {
+        //     console.log("miningProgressing")
+        // });
 
         this.socket.on('miningProgressing', (messageKey) => {
             console.log("miningProgressing")
@@ -64,10 +70,8 @@ new Vue({
 
         invokeAlgorithm() {
             if (this.algorithmState === 'IDLE') {
-                console.log("invoking algorithm")
 
                 // this.socket.emit('dummyInvokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: this.phraseDatabase.getNegativePhrases(), topPhraseCount: 20 });
-                console.log("sending", this.phraseDatabase.getNegativePhrases())
                 this.socket.emit('invokeAlgorithm', { positiveLabels: this.savedPositivePhrases, negativeLabels: this.phraseDatabase.getNegativePhrases(), topPhraseCount: parseInt(this.topPhraseCount) });
                 this.algorithmState = 'RUNNING';
             } else {
@@ -96,6 +100,36 @@ new Vue({
         clearPhrases() {
             this.phraseDatabase.clearPhrases();
             this.savedPositivePhrases = []
+        },
+
+        uploadFile() {
+
+            
+            let file = document.getElementById("client-data").files[0];
+            if (!file) {
+                window.alert(`Computers can't upload unspecified files`)
+                return;
+            }
+            let formData = new FormData();
+            formData.append("file", file);
+            this.algorithmState = 'UPLOADING'
+            fetch(`${HOST}/upload`, {method: "POST", body: formData})
+                .then(response => {
+                    if (response.ok) {
+                        console.log("Upload Successful")
+                        localStorage.miningFileName = file.name
+                        this.fileName = file.name
+                    } else {
+                        window.alert(`Upload failed with reason ${response.statusText}`)
+                    }
+                    this.algorithmState = 'IDLE'
+                })
+        },
+
+        useDefaultFile() {
+            this.fileName = null
+            localStorage.removeItem('miningFileName');
+            fetch(`${HOST}/delete-upload`, {method: "POST"})
         }
     }
 })

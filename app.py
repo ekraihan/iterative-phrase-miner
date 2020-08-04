@@ -10,6 +10,8 @@ import threading
 
 app = Flask(__name__, template_folder="ui", static_folder="ui", static_url_path="")
 app.config['UPLOAD_FOLDER'] = "./uploads"
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
+
 socketio = SocketIO(app, async_mode='eventlet')
 
 g_lock = threading.Lock()
@@ -39,8 +41,6 @@ def start_mining_process(trainingFile, modelPath, positivePhrases):
                            text=True)
 
 def collect_top_n_phrases(autoPhraseIter, topPhraseCount, clientPhrases):
-
-    print("cli dude:", clientPhrases)
     finalPhrases = list()
     for rawPhrase in autoPhraseIter:
         phrase = rawPhrase.split('\t')[1].strip()
@@ -167,7 +167,7 @@ def kill_algorithm():
 def client_disconnect():
     kill_algorithm()
 
-@app.route('/uploader', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -190,6 +190,14 @@ def upload_file():
             # return redirect(url_for('uploaded_file',
             #                         filename=filename))
 
+    return "", 200
+
+@app.route('/delete-upload', methods=['POST'])
+def delete_upload():
+    clientData = f'client-data/{request.cookies["browserId"]}.txt'
+    if (os.path.exists(clientData)):
+        os.remove(clientData)
+    
     return "", 200
 
 if __name__ == '__main__':

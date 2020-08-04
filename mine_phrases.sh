@@ -75,8 +75,6 @@ if [ $FIRST_RUN -eq 1 ]; then
     STOPWORDS=$PRIOR_DIR/$LANGUAGE/stopwords.txt
     ALL_WIKI_ENTITIES=$PRIOR_DIR/$LANGUAGE/wiki_all.txt
     QUALITY_WIKI_ENTITIES=${QUALITY_PHRASES:- $PRIOR_DIR/$LANGUAGE/wiki_quality.txt}
-
-    echo "dude" $QUALITY_WIKI_ENTITIES
     # echo -ne "Current step: Tokenizing stopword file...\033[0K\r"
     java $TOKENIZER -m test -i $STOPWORDS -o $TOKENIZED_STOPWORDS -t $TOKEN_MAPPING -c N -thread $THREAD
     echo TOKENIZING_KNOWLEDGE_BASE
@@ -136,7 +134,7 @@ else
         --min_sup $MIN_SUP
 fi
 
-echo SAVING_MODEL
+# echo SAVING_MODEL
 
 cp tmp/segmentation.model ${MODEL_DIR}/segmentation.model
 cp tmp/token_mapping.txt ${MODEL_DIR}/token_mapping.txt
@@ -144,7 +142,7 @@ cp tmp/language.txt ${MODEL_DIR}/language.txt
 
 ### END AutoPhrasing ###
 
-echo SAVING_PRASES
+# echo SAVING_PRASES
 # java $TOKENIZER -m translate -i tmp/final_quality_multi-words.txt -o ${MODEL_DIR}/AutoPhrase_multi-words.txt -t $TOKEN_MAPPING -c N -thread $THREAD
 # java $TOKENIZER -m translate -i tmp/final_quality_unigrams.txt -o ${MODEL_DIR}/AutoPhrase_single-word.txt -t $TOKEN_MAPPING -c N -thread $THREAD
 java $TOKENIZER -m translate -i tmp/final_quality_salient.txt -o ${MODEL_DIR}/AutoPhrase.txt -t $TOKEN_MAPPING -c N -thread $THREAD
